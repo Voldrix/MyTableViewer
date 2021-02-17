@@ -8,12 +8,19 @@ if(isset($_POST['table'])) { //AJAX table pull
   foreach($databases as $db) if($db['key'] === $_POST['id']) $thisdb = $db;
   $con = mysqli_connect($thisdb['host'],$thisdb['un'],$thisdb['pw'],$thisdb['db']);
   mysqli_set_charset($con,'utf8');
-  $res = mysqli_query($con, 'SHOW COLUMNS FROM `'.$_POST['table'].'`');
+  $table = str_replace(array('\\',';','"','`'),'',$_POST['table']);
+  $res = mysqli_query($con, 'SHOW COLUMNS FROM `'.$table.'`');
   $columns = array_column(mysqli_fetch_all($res,MYSQLI_ASSOC),'Field');
-  if(!empty($_POST['sort'])) $sort = ' ORDER BY '.$_POST['sort'];
-  $res = mysqli_query($con, 'SELECT * FROM `'.$_POST['table'].'`'.$sort);
+  $select = '*';
+  if(!empty($_POST['select'])) { //user field selection
+    $userFields = explode(',',str_replace(array('\\',';','"','`'),'',$_POST['select']));
+    if($fields = array_intersect($columns,$userFields)) { $columns = $fields; $select = implode(',',$fields); }
+  }
+  if(!empty($_POST['where'])) $where = ' WHERE '.str_replace(array('\\',';'),'',$_POST['where']); //user where clause
+  if(!empty($_POST['sort'])) $sort = ' ORDER BY '.str_replace(array('\\',';','"','`'),'',$_POST['sort']); //user sort
+  $res = mysqli_query($con, 'SELECT '.$select.' FROM `'.$table.'`'.$where.$sort);
   echo '<table id=data><thead><tr>';$n=0;
-  foreach($columns as $c) {echo '<th><a href=javascript:sortTable('.$n.') oncontextmenu=getTable("'.$_POST['table'].'",this,event)>'.$c.'</a></th>';$n++;}
+  foreach($columns as $c) {echo '<th><a href=javascript:sortTable('.$n.') oncontextmenu=getTable("'.$table.'",this,event)>'.$c.'</a></th>';$n++;}
   echo '</tr></thead><tbody>';
   while($r = mysqli_fetch_assoc($res)) {
     echo '<tr>';
@@ -68,14 +75,14 @@ a {color:#101010;text-decoration:none;font-weight:bold;}
 .welcome {text-align:center;padding:16px;box-shadow:-12px 0px 12px -10px #999, 12px 0px 12px -10px #999;}
 .welcome a {display:block;background-color:#FFF;font-weight:normal;padding:8px 6px;margin-top:12px;border-bottom:1px solid #C0C0C0;border-radius:7px;}
 .welcome a:hover {box-shadow: 0 0 11px -3px #999 inset;}
-.head {padding:4px 6px;border-bottom:1px solid #BBB;}
+.head {padding:4px 6px;border-bottom:1px solid #BBB;margin-bottom:10px;}
 .head .backbtn {font-size:32px;}
 .head h1 {display:inline;font-size:24px;line-height:28px;font-weight:normal;}
 .head select {-webkit-appearance:none;-moz-appearance:none;appearance:none;width:122px;line-height:20px;padding:2px 10px;background-color:#FFF;border-radius:12px;position:absolute;left:50%;margin-left:-75px;cursor:pointer;}
 .head .delbtn {float:right;font-size:40px;padding-top:4px;font-weight:normal;}
 table {border:none;font-size:14px;line-height:16px;}
 table a {display:block;line-height:18px;font-size:16px;border-right:2px solid #E0E0E0;}
-.dbdesc {padding:14px 4px 4px 4px;}
+.dbdesc {padding:12px 4px 4px 4px;}
 .dbdesc tr {background-image:linear-gradient(to bottom,#F8F8F8,#E8E8E8);vertical-align:top;}
 .dbdesc table table td {font-family:'Arial Narrow';border-right:2px solid #E0E0E0;}
 .dbdata {padding:4px 4px 8px 4px;}
@@ -86,7 +93,7 @@ if(isset($_GET['db']) && !isset($_GET['del'])) { //tables page
   foreach($databases as $db) {if($db['key'] === $_GET['db']) if(empty($db['priv']) || $db['priv'] === $_COOKIE['mtvid']) $thisdb = $db;}
   echo '<div class=head><a href="javascript:location.search=\'\'" class=backbtn>&lang; </a><h1 title="'.$thisdb['un'].'@'.$thisdb['host'].'"> '.$thisdb['db'].'</h1><select onchange="window.location=\'?db=\'+this.value;"><option value="#">Select Database</option>';
   foreach($databases as $db) if(empty($db['priv']) || $db['priv'] === $_COOKIE['mtvid']) echo '<option value="'.$db['key'].'">'.$db['db'].' - '.$db['un'].'@'.$db['host'].'</option>';
-  echo '</select><a href="javascript:location.search+=\'&del=x\';" title="Remove This DB" class=delbtn>&#128465;</a></div><div class=dbdesc><table><thead><tr>';
+  echo '</select><a href="javascript:location.search+=\'&del=x\';" title="Remove This DB" class=delbtn>&#128465;</a></div>SELECT <input type=text id=select placeholder="list,of,fileds,empty=*"> WHERE <input type=text id=where placeholder="column=\'value\'"> <input type=button onclick="document.getElementById(\'select\').value=\'\';document.getElementById(\'where\').value=\'\'" value=Clear><div class=dbdesc><table><thead><tr>';
   $con = mysqli_connect($thisdb['host'],$thisdb['un'],$thisdb['pw'],$thisdb['db']);
   mysqli_set_charset($con,'utf8');
   $tables = mysqli_query($con, 'SHOW TABLES');
@@ -131,6 +138,8 @@ function getTable(table,column=false,e) {
     var sort = '&sort='+encodeURIComponent(column.innerText)+aod;
   }
   else var sort = '';
+  var select = document.getElementById('select').value;
+  var where = document.getElementById('where').value;
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if(this.readyState === 4 && this.status === 200)
@@ -138,7 +147,7 @@ function getTable(table,column=false,e) {
   }
   xhttp.open('POST','?',true);
   xhttp.setRequestHeader('Content-type','application/x-www-form-urlencoded');
-  xhttp.send('id='+dbid.get('db')+'&table='+table+sort);
+  xhttp.send('id='+dbid.get('db')+'&table='+table+sort+'&select='+encodeURIComponent(select)+'&where='+encodeURIComponent(where));
 }
 function sortTable(n) {
   var rows = document.getElementById('data').rows;
