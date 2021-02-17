@@ -6,15 +6,15 @@ Other database tools like Adminer / PHPMyAdmin are great for when you need contr
 This interface is designed to use your whole viewing window for the actual contents of your databases.
 
 ## Usage
-The welcome screen will display only a list of databases you have added.  
-To add a new database, hover your cursor at the bottom of the screen.  
-- If hostname is left blank, it will default to localhost.
-- The 'private' toggle switch will set a cookie that makes that database only viewable to you. Otherwise anyone who visits this page can see it. This is denoted by a lock icon next to it in the database list.
-- Remove a database by clicking on it, then clicking the trash icon in the top right.
-Click on a table name header to pull and display that table below.\
-Click on a table's column header to sort the table client-side.\
-Right-click (long press on mobile) on a column header to have the database sort the table server-side.\
-Hover over the database name to see the user and hostname.
+* The welcome screen will display only a list of databases you have added.  
+* To add a new database, hover your cursor at the bottom of the screen.  
+  - If hostname is left blank, it will default to localhost.
+  - The 'private' toggle switch will set a cookie that makes that database only viewable to you. Otherwise anyone who visits this page can see it. This is denoted by a lock icon next to it in the database list.
+  - Remove a database by clicking on it, then clicking the trash icon in the top right.
+* Click on a table name header to pull and display that table below.
+* Click on a table's column header to sort the table client-side.
+* Right-click (long press on mobile) on a column header to have the database sort the table server-side.
+* Hover over the database name to see the user and hostname.
 
 The database credential cache is stored in /tmp/MyTableViewer and is readable (0600) only to your webserver user (e.g. www-data).
 
