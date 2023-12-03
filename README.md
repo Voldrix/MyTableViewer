@@ -4,7 +4,7 @@ Written in PHP for MySQL / MariaDB databases.
 
 ## Description
 View the contents of your databases utilizing every inch of your screen without the clutter of UI controls.\
-Sort columns client-side or server-side.\
+Sort columns client-side.\
 Code is clear and easy to edit. No compilation required.
 
 ## Usage
@@ -15,7 +15,6 @@ Code is clear and easy to edit. No compilation required.
   - Remove a database by clicking on it, then clicking the trash icon in the top right.
 * Click on a table name header to pull and display that table below.
 * Click on a table's column header to sort the table client-side.
-* Right-click (long press on mobile) on a column header to have the database sort the table server-side.
 * Hover over the database name to see the user and hostname.
 
 The database credential cache is stored in /tmp/MyTableViewer and is readable (0600) only to your webserver user (e.g. www-data).
@@ -26,7 +25,7 @@ The database credential cache is stored in /tmp/MyTableViewer and is readable (0
 There is no code to assemble, so you can use this permanent link to the raw file [MyTableViewer.php](https://raw.githubusercontent.com/Voldrix/MyTableViewer/master/MyTableViewer.php)
 
 ## Contributing
-Feel free to contribute. Just keep in mind we're trying to keep it as simple as possible.
+Feel free to contribute. Just keep in mind we're trying to keep it as simple and clean as possible.
 
 ## License
 [MIT License](LICENSE)
