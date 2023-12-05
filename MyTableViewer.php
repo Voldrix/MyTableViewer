@@ -77,6 +77,17 @@ if(isset($_POST['dbName'])) {
 }
 
 
+//ROW COUNT
+if(isset($_GET['getRowCount'])) {
+  if(empty($db))
+    _return(400);
+
+  $res = mysqli_query($conn, 'SELECT COUNT(*) FROM `' . str_replace(array('\\',';','"','`'), '', $_GET['table']) . '`');
+  echo mysqli_fetch_row($res)[0];
+  _return(200);
+}
+
+
 //DELETE DB
 if(isset($_GET['del'])) {
   foreach($databases as $key => $database)
@@ -258,7 +269,7 @@ function renderTables() {
     let newTable = document.createElement('table');
     let row = newTable.insertRow();
     let cell = row.insertCell();
-    cell.innerHTML = `<a onclick=getTableData("${tbl['table_name']}")>${tbl['table_name']} <span style="font-weight:normal;">(${tbl['table_rows']})</span></a>`;
+    cell.innerHTML = `<a onclick=getTableData("${tbl['table_name']}") oncontextmenu=getRowCount(this,event,"${tbl['table_name']}")>${tbl['table_name']} <span style="font-weight:normal;">(${tbl['table_rows']})</span></a>`;
     for(col of listColumns) {
       if(col['TABLE_NAME'] !== tbl['table_name']) continue;
       row = newTable.insertRow();
@@ -293,6 +304,21 @@ function renderData() {
   }
   dataContainer.innerHTML = null;
   dataContainer.appendChild(newTable);
+}
+
+
+function getRowCount(elem, e, tableName) {
+  e.preventDefault();
+  var xhttp = new XMLHttpRequest();
+  xhttp.onloadend = function() {
+    if(this.status === 200) {
+      elem.children[0].innerText = '(' + this.response + ')';
+    }
+    else alert(`Error: ${this.status} ${this.statusText}`);
+  }
+  xhttp.open('GET', '?db='+db+'&table='+tableName+'&getRowCount=1', true);
+  xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+  xhttp.send();
 }
 
 
